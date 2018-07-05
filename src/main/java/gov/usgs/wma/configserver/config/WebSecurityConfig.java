@@ -23,21 +23,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http
 				.authorizeRequests()
 					.antMatchers("/actuator/health").permitAll()
-                    .anyRequest().fullyAuthenticated()
-                    .and()
-                    .httpBasic();
+					.anyRequest().fullyAuthenticated()
+					.and()
+					.httpBasic();
 	}
 	
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth
 			.inMemoryAuthentication()
-                .passwordEncoder(passwordEncoder())
+				.passwordEncoder(passwordEncoder())
 				.withUser(configUser).password(passwordEncoder().encode(configPassword)).roles("CONFIG");
 	}
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }
