@@ -9,7 +9,7 @@ server:
 
 spring:
   profiles:
-    active: default, git
+    active: composite
   application:
     name: water-spring-config-server
   jmx:
@@ -17,13 +17,21 @@ spring:
   cloud:
     config:
       server:
-        git:
-          uri: ${gitRepoUri}
-          username: ${gitRepoUsername}
-          password: ${gitRepoPassword}
+        composite:
+        -
+          type: git
+          uri: ${gitSecretRepoUri}
+          username: ${gitSecretRepoUser}
+          password: ${gitSecretRepoPassword}
           searchPaths: '{application}'
           clone-on-start: true
-
+        -
+          type: git
+          uri: ${gitConfigRepoUri}
+          username: ${gitConfigRepoUser}
+          password: ${gitConfigRepoPassword}
+          searchPaths: '{application}'
+          clone-on-start: true
 security:
   require-ssl: true
   basic:
