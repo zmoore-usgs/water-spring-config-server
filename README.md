@@ -28,6 +28,7 @@ Configuration Git repos should contain a sub-directory from the root git repo di
 Application sub-directories **must** be named so that they match the `spring.application.name` value configured for the application that should be accessing them. I.E: An application with a `spring.application.name` value of `my-app` will only be able to load configuration from sub-directories in the configured git repos that are named `my-app`.
 
 Each project sub-directory should contain configuration files just as if they were being loaded by the application locally. This means that the directory should likely have an `application.yml` file containing most of the default application configuration, and then also any other configuration files that the application might be configured to load configuration from.
+
 ### 3. Auth
 In order to protect secrets client applications that want to connect to the configuration server must provide credentials. The credentials for the configuration server are set via the following ENV variables:
 
@@ -45,6 +46,30 @@ As with other Springboot-based applications there are several additional deploym
 - `keystoreSSLKey` - The alias of the key within the keystore to serve out as the application's SSL cert. This key should have no password or a password equal to the password of they keystore itself.
 
 ## Client Usage
+In order for a client application to use the config server it must include the Spring Cloud Config starter dependency:
+
+```
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-config</artifactId>
+</dependency>
+```
+If this is the application's first dependency from the Spring Cloud project then the following will also be necessary (where the `version` value is changed to the version compatible with your application's version of Spring Boot):
+```
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dependencies</artifactId>
+            <version>Edgware.SR2</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+Once the dependency is included there should be no additional code changes required to use the config server, only configuration changes which are described in detail below.
+
 ### 1. `application.yml` vs `bootstrap.yml`
 Using an implementation of the Spring Config Server with a client application introduces the concept of a `bootstrap.yml` file into each client. The `bootstrap.yml` file is required for each client application as it is loaded prior to the loading of all other configuration (including `application.yml`) and is used to confiugre the client's connection to a Spring Config Server instance.
 

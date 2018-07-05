@@ -6,10 +6,9 @@ server:
     key-store-password: ${keystorePassword}
     key-password: ${keystorePassword}
     key-alias: ${keystoreSSLKey:tomcat}
-
 spring:
   profiles:
-    active: composite
+    active: default, composite
   application:
     name: water-spring-config-server
   jmx:
@@ -33,11 +32,7 @@ spring:
           searchPaths: '{application}'
           clone-on-start: true
 security:
-  require-ssl: true
   basic:
     enabled: true
-    path: /**
-  ignored: /health**,/info**,/metrics**,/trace**
-  user:
-    name: ${configServerUser}
-    password: ${configServerPassword}
+configServerUser: ${configServerUser}
+configServerPassword: ${configServerPassword}
