@@ -31,8 +31,6 @@ install:
   - cd ../..
 
 script:
-  - version=$(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec)
-  - cp "./target/water-spring-config-server-${version}.jar" ./water-spring-config-server.jar
   - >
     nohup java -jar -Djava.security.egd=file:/dev/./urandom ./.travis/water-spring-config-server.jar
     --spring.cloud.config.server.health.enabled=true
@@ -45,7 +43,7 @@ script:
     --configServerUser="config_server_user"
     --configServerPassword="config_server_password"
     --keystoreLocation="./.travis/cacerts"
-    --keystorePassword="changeit" 
+    --keystorePassword="changeit"
     --keystoreSSLKey="water-spring-config-server" &
   - for run in {1..20};do sleep 1;if grep -q "Started Application" nohup.out; then echo "Application is running";break;else echo "Still checking for application startup. Check ${run} of 20";fi;done
   - curl -u config_server_user:config_server_password -k https://localhost:8888/actuator/health -s | grep -q '{"status":"UP"}'
