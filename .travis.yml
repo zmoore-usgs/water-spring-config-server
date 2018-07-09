@@ -1,0 +1,51 @@
+sudo: false
+
+language: java
+
+install:
+  - rm nohup.out || true
+  - rm -rf .travis
+  - rm -rf target
+  - mkdir -p ./.travis/secrets/test-app
+  - mkdir -p ./.travis/configs/test-app
+  - mvn clean install package -DoutputDirectory=.
+  - cp "./target/water-spring-config-server-$(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec).jar" ./.travis/water-spring-config-server.jar
+  - openssl genrsa -out .travis/wildcard.key 2048
+  - openssl req -nodes -newkey rsa:2048 -keyout  .travis/wildcard.key -out  .travis/wildcard.csr -subj "/C=US/ST=Wisconsin/L=Middleon/O=US Geological Survey/OU=WMA/CN=*"
+  - openssl x509 -req -days 9999 -in .travis/wildcard.csr -signkey .travis/wildcard.key  -out .travis/wildcard.crt
+  - openssl pkcs12 -export -in ./.travis/wildcard.crt -inkey ./.travis/wildcard.key -name water-spring-config-server -out ./.travis/wildcard.p12 -name "water-spring-config-server" -passout pass:changeit
+  - cp ${JAVA_HOME}/jre/lib/security/cacerts ./.travis/
+  - keytool -importkeystore -deststorepass changeit -destkeystore ./.travis/cacerts -srckeystore ./.travis/wildcard.p12 --srcstorepass "changeit"
+  - cd .travis/secrets/test-app
+  - touch application.yml
+  - cd ..
+  - git init
+  - git add .
+  - git commit . -m'test'
+  - cd ../configs/test-app
+  - touch application.yml
+  - cd ..
+  - git init
+  - git add .
+  - git commit . -m'test'
+  - cd ../..
+
+script:
+  - version=$(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec)
+  - cp "./target/water-spring-config-server-${version}.jar" ./water-spring-config-server.jar
+  - >
+    nohup java -jar -Djava.security.egd=file:/dev/./urandom ./.travis/water-spring-config-server.jar
+    --spring.cloud.config.server.health.enabled=true
+    --gitSecretRepoUri="file:.travis/secrets/"
+    --gitConfigRepoUri="file:.travis/configs/"
+    --gitSecretRepoUser="secrets_user"
+    --gitSecretRepoPassword="secrets_user_password"
+    --gitConfigRepoUser="config_user"
+    --gitConfigRepoPassword="config_password"
+    --configServerUser="config_server_user"
+    --configServerPassword="config_server_password"
+    --keystoreLocation="./.travis/cacerts"
+    --keystorePassword="changeit" 
+    --keystoreSSLKey="water-spring-config-server" &
+  - for run in {1..20};do sleep 1;if grep -q "Started Application" nohup.out; then echo "Application is running";break;else echo "Still checking for application startup. Check ${run} of 20";fi;done
+  - curl -u config_server_user:config_server_password -k https://localhost:8888/actuator/health -s | grep -q '{"status":"UP"}'
