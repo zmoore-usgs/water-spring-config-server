@@ -85,9 +85,9 @@
 	</build>
 
 	<scm>
-		<connection>scm:git:https://github.com/USGS-CIDA/aqcu-gateway.git</connection>
-		<developerConnection>scm:git:https://${env.GITHUB_USER}:${env.GITHUB_PASS}@github.com/USGS-CIDA/aqcu-gateway.git</developerConnection>
-		<url>https://github.com/USGS-CIDA/aqcu-gateway</url>
+		<connection>scm:git:https://github.com/USGS-CIDA/water-spring-config-server.git</connection>
+		<developerConnection>scm:git:https://${env.GITHUB_USER}:${env.GITHUB_PASS}@github.com/USGS-CIDA/water-spring-config-server.git</developerConnection>
+		<url>https://github.com/USGS-CIDA/water-spring-config-server</url>
 		<tag>HEAD</tag>
 	</scm>
 </project>
