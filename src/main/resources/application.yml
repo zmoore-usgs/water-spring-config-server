@@ -1,0 +1,38 @@
+server:
+  port: ${serverPort:8888}
+  use-forward-headers: true
+  ssl:
+    key-store: ${keystoreLocation}
+    key-store-password: ${keystorePassword}
+    key-password: ${keystorePassword}
+    key-alias: ${keystoreSSLKey:tomcat}
+spring:
+  profiles:
+    active: default, composite
+  application:
+    name: water-spring-config-server
+  jmx:
+    default-domain: water-spring-config-server
+  cloud:
+    config:
+      server:
+        composite:
+        -
+          type: git
+          uri: ${gitSecretRepoUri}
+          username: ${gitSecretRepoUser}
+          password: ${gitSecretRepoPassword}
+          searchPaths: '{application}'
+          clone-on-start: true
+        -
+          type: git
+          uri: ${gitConfigRepoUri}
+          username: ${gitConfigRepoUser}
+          password: ${gitConfigRepoPassword}
+          searchPaths: '{application}'
+          clone-on-start: true
+security:
+  basic:
+    enabled: true
+configServerUser: ${configServerUser}
+configServerPassword: ${configServerPassword}
